@@ -1,10 +1,11 @@
 #!/bin/bash
 USER="$(whoami)"
 HOST_TEMPLATE='fphct%02d'
-NUM_HOSTS=30
-i=1
+START_HOST_NUMBER=1
+END_HOST_NUMBER=30
 
-while (( i < 30 )); do
+i="$START_HOST_NUMBER"
+while (( i <= END_HOST_NUMBER )); do
   echo "pruefe: $host"
   host="$(printf "$HOST_TEMPLATE" "$i")"
   echo -n users \
