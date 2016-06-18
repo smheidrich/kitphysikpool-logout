@@ -9,8 +9,19 @@ SSH_KEY_FILE=""
 KEY_IS_TEMP=""
 
 #
-# Auxilliary functions
+# Auxilliary functions etc.
 #
+
+# This script will be executed on remote hosts to perform the actual "logout".
+# It works by killing all processes except for the bash it is running in ($$)
+# and its parent sshd (parent of $$).
+# Note that this is a bash script and will fail if the remote shell is sh.
+LOGOUT_SCRIPT=$(cat <<'HEREDOC'
+parent_pid="$(ps -p $$ -o ppid=)"
+kill_pids="$(ps -u "$(id -u)" -o "pid=" | sed -e "/$$/d" -e "/$parent_pid/d")"
+kill $kill_pids
+HEREDOC
+)
 
 # Usage: lenient_ssh [-w WARN] user@host
 # Establishes SSH connection without asking the user to verify the host's
@@ -143,8 +154,8 @@ for (( i=START_HOST_NUMBER; i <= END_HOST_NUMBER; i++ )); do
   if [ $? = 0 ]; then
     line_up
     echo -n "Logged in: $host"
-    # "Log out" by killing KDE and save any warnings for later
-    msg="$(echo "killall startkde" | lenient_ssh -w 1 "$USER"@"$host")"
+    # "Log out" by executing the contents of LOGOUT_SCRIPT on the remote host
+    msg="$(echo "$LOGOUT_SCRIPT" | lenient_ssh -w 1 "$USER"@"$host")"
     # Check if the logout was successful and print saved warnings otherwise
     if [ $? = 0 ]; then
       echo " - logged out."
