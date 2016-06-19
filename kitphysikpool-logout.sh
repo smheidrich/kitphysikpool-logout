@@ -23,26 +23,17 @@ kill $kill_pids
 HEREDOC
 )
 
-# Usage: lenient_ssh [-w WARN] user@host
+# Usage: lenient_ssh user@host [WARN]
 # Establishes SSH connection without asking the user to verify the host's
 # identity. Host identity is NOT permanently saved to knows_hosts.
 # WARN decides where to put warnings (0: /dev/null, 1: stdout, 2: stderr)
 function lenient_ssh () {
-  # Argument processing
-  OPTIND=0
-  warn=2
-  getopts "w:" opt || return 1
-  if [ "$opt" = "w" ]; then
-    warn="$OPTARG"
-  fi
-  shift $((OPTIND-1))
-  dest="$1"
-  if [ -z "$dest" ]; then
-    echo "lenient_ssh: invalid arguments" 1>&2
-    return 1
-  fi
-  OPTIND=0
-  # Actual code
+  # Process arguments
+  [ -n "$1" ] && dest="$1" || {
+    echo 1>&2 "lenient_ssh: not enough arguments";
+    return 1;
+  }
+  [ -n "$2" ] && warn="$2" || warn=2
   # Build SSH command string
   SSH_CMD="ssh -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
   -o PasswordAuthentication=no -o BatchMode=yes"
@@ -91,7 +82,7 @@ test_host="$(printf "$HOST_TEMPLATE" "$START_HOST_NUMBER")"
 if [ -e "$AUTHORIZED_KEYS_FILE" ]; then
   echo "Found authorized_keys file. Not generating temporary SSH key."
   echo -n "Testing connection... "
-  msg="$(echo | lenient_ssh -w 1 "$USER"@"$test_host")"
+  msg="$(echo | lenient_ssh "$USER"@"$test_host" 1)"
   if [ $? != 0 ]; then
     echo 1>&2 "failed."
     echo 1>&2 "Could not connect to $test_host via SSH. Details:"
@@ -123,7 +114,7 @@ else
     exit 1
   fi
   echo -n "Testing connection... "
-  msg="$(echo | lenient_ssh -w 1 "$USER"@"$test_host")"
+  msg="$(echo | lenient_ssh "$USER"@"$test_host" 1)"
   if [ $? != 0 ]; then
     echo 1>&2 "failed."
     echo 1>&2 "Could not connect to $test_host via SSH. Details: "
@@ -147,7 +138,7 @@ for (( i=START_HOST_NUMBER; i <= END_HOST_NUMBER; i++ )); do
   # Output status
   echo "Checking: $host"
   # SSH to host and get list of logged-in users
-  remote_users="$(echo users | lenient_ssh -w 0 "$USER"@"$host")"
+  remote_users="$(echo users | lenient_ssh "$USER"@"$host" 0)"
   # Check if our user is among them (grep exit status will indicate this, we
   # don't need its output so it is discarded)
   echo "$remote_users" | grep -E '(^| )'"$USER"'( |$)' >&/dev/null
@@ -155,7 +146,7 @@ for (( i=START_HOST_NUMBER; i <= END_HOST_NUMBER; i++ )); do
     line_up
     echo -n "Logged in: $host"
     # "Log out" by executing the contents of LOGOUT_SCRIPT on the remote host
-    msg="$(echo "$LOGOUT_SCRIPT" | lenient_ssh -w 1 "$USER"@"$host")"
+    msg="$(echo "$LOGOUT_SCRIPT" | lenient_ssh "$USER"@"$host" 1)"
     # Check if the logout was successful and print saved warnings otherwise
     if [ $? = 0 ]; then
       echo " - logged out."
