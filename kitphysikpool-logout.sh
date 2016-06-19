@@ -122,7 +122,7 @@ else
     echo 1>&2 "Error while generating authorized_keys file."
     exit 1
   fi
-  echo -n "Testing connection..."
+  echo -n "Testing connection... "
   msg="$(echo | lenient_ssh -w 1 "$USER"@"$test_host")"
   if [ $? != 0 ]; then
     echo 1>&2 "failed."
@@ -165,6 +165,11 @@ for (( i=START_HOST_NUMBER; i <= END_HOST_NUMBER; i++ )); do
     fi
   else
     line_up
+  fi
+  # I got IP banned by KIT while testing the script, presumably because it was
+  # going too fast?
+  if [ -n "$GO_SLOW" ]; then
+    sleep 0.5
   fi
 done
 echo
