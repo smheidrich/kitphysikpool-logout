@@ -12,6 +12,8 @@ KEY_IS_TEMP=""
 # Auxilliary functions etc.
 #
 
+PROGNAME="kitphysikpool-logout.sh"
+
 # This script will be executed on remote hosts to perform the actual "logout".
 # It works by killing all processes except for the bash it is running in ($$)
 # and its parent sshd (parent of $$).
@@ -30,7 +32,7 @@ HEREDOC
 function lenient_ssh () {
   # Process arguments
   [ -n "$1" ] && dest="$1" || {
-    echo 1>&2 "lenient_ssh: not enough arguments";
+    echo 1>&2 "$PROGNAME: lenient_ssh: not enough arguments";
     return 1;
   }
   [ -n "$2" ] && warn="$2" || warn=2
@@ -69,18 +71,50 @@ function cleanup_tempkey () {
 }
 
 #
+# Command-line argument processing (based on example that comes with getopt)
+#
+
+opt_temp=`getopt -o kr --long no-keygen,no-localhost-check,remote \
+  -n "$PROGNAME" -- "$@"`
+
+if [ $? != 0 ] ; then echo "Invalid arguments." 1>&2 ; exit 1 ; fi
+
+# Set positional parameters to getopt's results
+eval set -- "$opt_temp"
+
+while true ; do
+  case "$1" in
+    -k|--no-keygen) NO_KEYGEN="yes"; shift ;;
+    --no-localhost-check) NO_LOCALHOST_CHECK="yes"; shift ;;
+    -r|--remote)
+      NO_KEYGEN="yes";
+      NO_LOCALHOST_CHECK="yes";
+      shift ;;
+    --) shift ; break ;;
+    *) echo "Internal error!" 1>&2 ; exit 1 ;;
+  esac
+done
+
+#
 # SSH key setup (if required)
 #
 
 # Hostname used to test if SSH can establish a connection
 test_host="$(printf "$HOST_TEMPLATE" "$START_HOST_NUMBER")"
 
-# Idea here: If authorized_keys file present, then the user has already set up
-# SSH keys and needs to load (ssh-agent) of configure (ssh_config) them.
+# Idea here: If authorized_keys file present or NO_KEYGEN set, then the user
+# has already set up SSH keys and needs to load (ssh-agent) of configure
+# (ssh_config) them.
 # Otherwise we generate a temporary keypair for them and put the public key
 # into authorized_keys.
-if [ -e "$AUTHORIZED_KEYS_FILE" ]; then
+if [ -n "$NO_KEYGEN" ]; then
+  echo "SSH key generation disabled. Not generating temporary SSH key."
+elif [ -e "$AUTHORIZED_KEYS_FILE" ]; then
   echo "Found authorized_keys file. Not generating temporary SSH key."
+  NO_KEYGEN="yes"
+fi
+
+if [ -n "$NO_KEYGEN" ]; then
   echo -n "Testing connection... "
   msg="$(echo | lenient_ssh "$USER"@"$test_host" 1)"
   if [ $? != 0 ]; then
@@ -133,8 +167,11 @@ i="$START_HOST_NUMBER"
 for (( i=START_HOST_NUMBER; i <= END_HOST_NUMBER; i++ )); do
   # Build hostname from template and current number
   host="$(printf "$HOST_TEMPLATE" "$i")"
-  # Skip this host if it's the local machine
-  [ "$host" = "$(hostname)" ] && continue
+  # Skip this host if it's the local machine unless localhost checking is
+  # disabled
+  if [ -z "$NO_LOCALHOST_CHECK" -a "$host" = "$(hostname)" ]; then
+    continue
+  fi
   # Output status
   echo "Checking: $host"
   # SSH to host and get list of logged-in users
