@@ -42,7 +42,7 @@ function lenient_ssh () {
   if [ -n "$SSH_KEY_FILE" ]; then
     SSH_CMD="$SSH_CMD -i $SSH_KEY_FILE"
   fi
-  SSH_CMD="$SSH_CMD $dest"
+  SSH_CMD="$SSH_CMD $dest bash"
   # Execute it with appropriate redirections
   if [ "$warn" = 0 ]; then
     $SSH_CMD 2>/dev/null
