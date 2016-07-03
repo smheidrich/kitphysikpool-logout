@@ -8,14 +8,19 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 kitphysikpool-logout.sh
 =======================
 
-This script allows people who forgot to log out of one of the shared computers
-of the [KIT physics department pool](http://comp.physik.kit.edu/) to
-automatically check the computers one by one via SSH and log out if it is found
-they are still logged in.
+This script allows people to automatically identify shared computers of the
+[KIT physics department pool](http://comp.physik.kit.edu/) ("Poolraum-PCs")
+where they are still logged in and log out of them via SSH.
 
 
 Usage
 -----
+
+The script *has* to be run from another shared KIT physics department computer
+("Poolraum-PC"), so log into one of those first (either via SSH or physically)
+and run the instructions on this computer only. Simply being inside the KIT
+network is not enough, it has to be run from one of those computers. There are
+ways around this requirement, but it's probably not worth the effort.
 
 Download the latest version of the script from Github:
 
