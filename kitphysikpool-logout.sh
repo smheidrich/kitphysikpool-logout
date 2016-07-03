@@ -75,10 +75,25 @@ function cleanup_tempkey () {
 # Command-line argument processing (based on example that comes with getopt)
 #
 
-opt_temp=`getopt -o k --long no-keygen,no-localhost-check \
+function print_usage () {
+  echo "Usage: kitphysikpool-logout.sh [OPTION...]"
+  echo
+  echo "Logs you out of all other shared KIT physics department computers."
+  echo "Has to be run from inside the computer pool."
+  echo
+  echo "Options:"
+  echo "  -k, --no-keygen        disable automatic generation of temporary SSH"
+  echo "                         key"
+  echo "  --no-localhost-check   disable localhost check, usually a bad idea"
+  echo "                         because it kills your own session"
+  echo "  -h, --help             print this help and exit"
+  echo
+}
+
+opt_temp=`getopt -o kh --long no-keygen,no-localhost-check,help \
   -n "$PROGNAME" -- "$@"`
 
-if [ $? != 0 ] ; then echo "Invalid arguments." 1>&2 ; exit 1 ; fi
+if [ $? != 0 ]; then echo; print_usage; exit 1; fi
 
 # Set positional parameters to getopt's results
 eval set -- "$opt_temp"
@@ -87,6 +102,7 @@ while true ; do
   case "$1" in
     -k|--no-keygen) NO_KEYGEN="yes"; shift ;;
     --no-localhost-check) NO_LOCALHOST_CHECK="yes"; shift ;;
+    -h|--help) print_usage; exit 0; shift ;;
     --) shift ; break ;;
     *) echo "Internal error!" 1>&2 ; exit 1 ;;
   esac
