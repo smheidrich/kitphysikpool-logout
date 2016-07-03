@@ -38,7 +38,7 @@ function lenient_ssh () {
   [ -n "$2" ] && warn="$2" || warn=2
   # Build SSH command string
   SSH_CMD="ssh -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-  -o PasswordAuthentication=no -o BatchMode=yes"
+  -o PasswordAuthentication=no -o BatchMode=yes -o ConnectTimeout=2"
   if [ -n "$SSH_KEY_FILE" ]; then
     SSH_CMD="$SSH_CMD -i $SSH_KEY_FILE"
   fi
