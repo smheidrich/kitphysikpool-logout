@@ -9,9 +9,9 @@ kitphysikpool-logout.sh
 =======================
 
 This script allows people who forgot to log out of one of the shared computers
-of the [KIT's physics department](http://comp.physik.kit.edu/) to automatically
-check the computers one by one via SSH and log out if it is found they are
-still logged in.
+of the [KIT physics department pool](http://comp.physik.kit.edu/) to
+automatically check the computers one by one via SSH and log out if it is found
+they are still logged in.
 
 
 Usage
