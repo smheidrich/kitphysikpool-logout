@@ -3,6 +3,7 @@ USER="$(whoami)"
 HOST_TEMPLATE='fphct%02d'
 START_HOST_NUMBER=1
 END_HOST_NUMBER=34
+LOCALHOST="$(hostname)"
 
 AUTHORIZED_KEYS_FILE="$HOME/.ssh/authorized_keys"
 SSH_KEY_FILE=""
@@ -165,7 +166,7 @@ for (( i=START_HOST_NUMBER; i <= END_HOST_NUMBER; i++ )); do
   host="$(printf "$HOST_TEMPLATE" "$i")"
   # Skip this host if it's the local machine unless localhost checking is
   # disabled
-  if [ -z "$NO_LOCALHOST_CHECK" -a "$host" = "$(hostname)" ]; then
+  if [ -z "$NO_LOCALHOST_CHECK" -a "$host" = "$LOCALHOST" ]; then
     continue
   fi
   # Output status
