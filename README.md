@@ -72,7 +72,7 @@ The exact behaviour of the script differs depending on your SSH setup:
   to every configured computer.
 - If you do not have an SSH key set up, the script will by default attempt to
   generate one for you. Because your home directory is on a shared network
-  filesystem, this key will be instantly synced to all the other computers and
+  filesystem, this key will be synced on all the other shared computers and
   hence the script can use it to connect to them. After the script is done or
   if it is aborted for any other reason, it will delete the key again so
   everything is back to normal.
