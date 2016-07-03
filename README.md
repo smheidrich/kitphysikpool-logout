@@ -44,6 +44,16 @@ can then run it via:
 Remarks
 -------
 
+What the "logout" actually does is simply kill every single process that was
+spawned by your user account on the remote machine. So obviously, if you have
+any important unsaved work on the other machine that hasn't been transferred
+over to the machine you're currently on, you shouldn't use this script (this
+would also be true if the logout happened by any other means, by the way). One
+reason the "logout" kills everything and not just your KDE session is that this
+allows it to catch processes that were started from a virtual console
+(``Ctrl``+``Alt``+Function key) or decoupled from the session in some manner
+(e.g. ``nohup``).
+
 The hostnames of the computers that the script should connect to as well as
 some other details can be changed by modifying the first few lines of the
 script. They are pretty self-explanatory and you normally won't need to change
