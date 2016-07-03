@@ -74,7 +74,7 @@ function cleanup_tempkey () {
 # Command-line argument processing (based on example that comes with getopt)
 #
 
-opt_temp=`getopt -o kr --long no-keygen,no-localhost-check,remote \
+opt_temp=`getopt -o k --long no-keygen,no-localhost-check \
   -n "$PROGNAME" -- "$@"`
 
 if [ $? != 0 ] ; then echo "Invalid arguments." 1>&2 ; exit 1 ; fi
@@ -86,10 +86,6 @@ while true ; do
   case "$1" in
     -k|--no-keygen) NO_KEYGEN="yes"; shift ;;
     --no-localhost-check) NO_LOCALHOST_CHECK="yes"; shift ;;
-    -r|--remote)
-      NO_KEYGEN="yes";
-      NO_LOCALHOST_CHECK="yes";
-      shift ;;
     --) shift ; break ;;
     *) echo "Internal error!" 1>&2 ; exit 1 ;;
   esac
