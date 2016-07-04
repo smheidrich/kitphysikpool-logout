@@ -84,13 +84,14 @@ function print_usage () {
   echo "Options:"
   echo "  -k, --no-keygen        disable automatic generation of temporary SSH"
   echo "                         key"
+  echo "  -l, --list             only list logins, don't log out (\"dry run\")"
   echo "  --no-localhost-check   disable localhost check, usually a bad idea"
   echo "                         because it kills your own session"
   echo "  -h, --help             print this help and exit"
   echo
 }
 
-opt_temp=`getopt -o kh --long no-keygen,no-localhost-check,help \
+opt_temp=`getopt -o klh --long no-keygen,list,no-localhost-check,help \
   -n "$PROGNAME" -- "$@"`
 
 if [ $? != 0 ]; then echo; print_usage; exit 1; fi
@@ -98,9 +99,11 @@ if [ $? != 0 ]; then echo; print_usage; exit 1; fi
 # Set positional parameters to getopt's results
 eval set -- "$opt_temp"
 
+NO_KEYGEN=""; NO_LOGOUT=""; NO_LOCALHOST_CHECK="";
 while true ; do
   case "$1" in
     -k|--no-keygen) NO_KEYGEN="yes"; shift ;;
+    -l|--list) NO_LOGOUT="yes"; shift ;;
     --no-localhost-check) NO_LOCALHOST_CHECK="yes"; shift ;;
     -h|--help) print_usage; exit 0; shift ;;
     --) shift ; break ;;
@@ -195,15 +198,20 @@ for (( i=START_HOST_NUMBER; i <= END_HOST_NUMBER; i++ )); do
   if [ $? = 0 ]; then
     line_up
     echo -n "Logged in: $host"
-    # "Log out" by executing the contents of LOGOUT_SCRIPT on the remote host
-    msg="$(echo "$LOGOUT_SCRIPT" | lenient_ssh "$USER"@"$host" 1)"
-    # Check if the logout was successful and print saved warnings otherwise
-    if [ $? = 0 ]; then
-      echo " - logged out."
+    if [ -n "$NO_LOGOUT" ]; then
+      # User only wants to list logins, so don't do anything
+      echo
     else
-      echo 1>&2 " - error while logging out. Details:"
-      echo 1>&2 "$msg"
-    fi
+      # "Log out" by executing the contents of LOGOUT_SCRIPT on the remote host
+      msg="$(echo "$LOGOUT_SCRIPT" | lenient_ssh "$USER"@"$host" 1)"
+      # Check if the logout was successful and print saved warnings otherwise
+      if [ $? = 0 ]; then
+        echo " - logged out."
+      else
+        echo 1>&2 " - error while logging out. Details:"
+        echo 1>&2 "$msg"
+      fi
+    fi # NO_LOGOUT
   else
     line_up
   fi
