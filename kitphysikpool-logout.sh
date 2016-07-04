@@ -76,19 +76,20 @@ function cleanup_tempkey () {
 #
 
 function print_usage () {
-  echo "Usage: kitphysikpool-logout.sh [OPTION...]"
-  echo
-  echo "Logs you out of all other shared KIT physics department computers."
-  echo "Has to be run from inside the computer pool."
-  echo
-  echo "Options:"
-  echo "  -k, --no-keygen        disable automatic generation of temporary SSH"
-  echo "                         key"
-  echo "  -l, --list             only list logins, don't log out (\"dry run\")"
-  echo "  --no-localhost-check   disable localhost check, usually a bad idea"
-  echo "                         because it kills your own session"
-  echo "  -h, --help             print this help and exit"
-  echo
+cat <<'HEREDOC'
+Usage: kitphysikpool-logout.sh [OPTION...]
+
+Logs you out of all other shared KIT physics department computers. Has to be
+run from inside the computer pool.
+  
+Options:
+  -k, --no-keygen        disable automatic generation of temporary SSH key
+  -l, --list             only list logins, don't actually log out ("dry run")
+  --no-localhost-check   disable localhost check, usually a bad idea because it
+                           kills your own session
+  -h, --help             print this help and exit
+
+HEREDOC
 }
 
 opt_temp=`getopt -o klh --long no-keygen,list,no-localhost-check,help \
